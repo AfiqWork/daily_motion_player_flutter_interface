@@ -1,6 +1,6 @@
-import 'dart:math';
-import 'dart:io';
 import 'package:flutter/services.dart';
+import 'dart:developer' as developer;
+
 
 class DailymotionPlayerController {
   final String videoId;
@@ -22,7 +22,7 @@ class DailymotionPlayerController {
     try {
       await _methodChannel.invokeMethod('play');
     } on PlatformException catch (e) {
-      print("Failed to play video: '${e.message}'.");
+      developer.log("Failed to play video: '${e.message}'.");
     }
   }
 
@@ -30,7 +30,7 @@ class DailymotionPlayerController {
     try {
       await _methodChannel.invokeMethod('pause');
     } on PlatformException catch (e) {
-      print("Failed to pause video: '${e.message}'.");
+      developer.log("Failed to pause video: '${e.message}'.");
     }
   }
 
@@ -38,7 +38,7 @@ class DailymotionPlayerController {
     try {
       await _methodChannel.invokeMethod('load', {'videoId': videoId});
     } on PlatformException catch (e) {
-      print("Failed to load video: '${e.message}'.");
+      developer.log("Failed to load video: '${e.message}'.");
     }
   }
 
@@ -46,7 +46,7 @@ class DailymotionPlayerController {
     try {
       await _methodChannel.invokeMethod('seek', {'seconds': seconds});
     } on PlatformException catch (e) {
-      print("Failed to seek video: '${e.message}'.");
+      developer.log("Failed to seek video: '${e.message}'.");
     }
   }
 
@@ -54,7 +54,7 @@ class DailymotionPlayerController {
     try {
       await _methodChannel.invokeMethod('replay');
     } on PlatformException catch (e) {
-      print("Failed to replay video: '${e.message}'.");
+      developer.log("Failed to replay video: '${e.message}'.");
     }
   }
 
@@ -63,7 +63,7 @@ class DailymotionPlayerController {
       final duration = await _methodChannel.invokeMethod<double>('getVideoDuration');
       return duration;
     } on PlatformException catch (e) {
-      print("Failed to get video duration: '${e.message}'.");
+      developer.log("Failed to get video duration: '${e.message}'.");
       return null;
     }
   }
@@ -73,7 +73,7 @@ class DailymotionPlayerController {
       final timestamp = await _methodChannel.invokeMethod<double>('getVideoCurrentTimestamp');
       return timestamp;
     } on PlatformException catch (e) {
-      print("Failed to get video timestamp: '${e.message}'.");
+      developer.log("Failed to get video timestamp: '${e.message}'.");
       return null;
     }
   }
@@ -82,7 +82,7 @@ class DailymotionPlayerController {
     try {
       await _methodChannel.invokeMethod('setMute');
     } on PlatformException catch (e) {
-      print("Failed setMute: '${e.message}'.");
+      developer.log("Failed setMute: '${e.message}'.");
     }
   }
 
@@ -90,7 +90,7 @@ class DailymotionPlayerController {
     try {
       await _methodChannel.invokeMethod('setUnMute');
     } on PlatformException catch (e) {
-      print("Failed setUnMute: '${e.message}'.");
+      developer.log("Failed setUnMute: '${e.message}'.");
     }
   }
 
@@ -98,7 +98,7 @@ class DailymotionPlayerController {
     try {
       await _methodChannel.invokeMethod('setPlaybackSpeed', {'speed': speed});
     } on PlatformException catch (e) {
-      print("Failed setPlaybackSpeed: '${e.message}'.");
+      developer.log("Failed setPlaybackSpeed: '${e.message}'.");
     }
   }
 }
