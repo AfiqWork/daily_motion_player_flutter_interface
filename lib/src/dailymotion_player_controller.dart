@@ -61,8 +61,11 @@ class DailymotionPlayerController {
 
   Future<double?> getVideoDuration() async {
     try {
-      final duration = await _methodChannel.invokeMethod<double>('getVideoDuration');
-      return duration;
+      final dynamic duration = await _methodChannel.invokeMethod('getVideoDuration');
+      if (duration is int) {
+        return duration.toDouble();
+      }
+      return duration as double?;
     } on PlatformException catch (e) {
       developer.log("Failed to get video duration: '${e.message}'.");
       return null;
@@ -71,13 +74,21 @@ class DailymotionPlayerController {
 
   Future<double?> getVideoCurrentTimestamp() async {
     try {
-      final timestamp = await _methodChannel.invokeMethod<double>('getVideoCurrentTimestamp');
-      return timestamp;
+      final dynamic timestamp =
+      await _methodChannel.invokeMethod('getVideoCurrentTimestamp');
+
+      if (timestamp is int) return timestamp.toDouble();
+      if (timestamp is double) return timestamp;
+
+      developer.log("Unexpected timestamp type: ${timestamp.runtimeType}");
+      return null;
     } on PlatformException catch (e) {
-      developer.log("Failed to get video timestamp: '${e.message}'.");
+      developer.log("Failed to get current timestamp: '${e.message}'.");
       return null;
     }
   }
+
+
 
   Future<bool?> playerIsBuffering() async {
     try {

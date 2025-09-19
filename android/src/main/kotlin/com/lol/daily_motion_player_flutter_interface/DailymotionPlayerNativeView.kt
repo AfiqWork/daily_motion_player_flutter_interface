@@ -2,45 +2,32 @@ package com.lol.daily_motion_player_flutter_interface
 
 import android.content.Context
 import android.view.View
-import androidx.fragment.app.FragmentManager
 import io.flutter.plugin.common.BinaryMessenger
 import io.flutter.plugin.common.MethodCall
 import io.flutter.plugin.common.MethodChannel
 import io.flutter.plugin.platform.PlatformView
+import android.util.Log
+
 
 class DailymotionPlayerNativeView(
     context: Context,
-    binaryMessenger: BinaryMessenger,
-    fragmentManager: FragmentManager,
+    messenger: BinaryMessenger,
     id: Int,
-    creationParams: Map<*, *>?
+    creationParams: Map<*, *>?,
+    channelName: String
 ) : PlatformView, MethodChannel.MethodCallHandler {
 
-    private val methodChannel: MethodChannel
-    private val dailymotionPlayerController: DailymotionPlayerController =
-        DailymotionPlayerController(context, creationParams, fragmentManager)
+    private val methodChannel = MethodChannel(messenger, channelName)
+    private val dailymotionPlayerController = DailymotionPlayerController(context, creationParams)
 
     init {
-        methodChannel = MethodChannel(binaryMessenger, "dailymotion-player-channel-$id")
         methodChannel.setMethodCallHandler(this)
-
-        // Event callbacks
-        dailymotionPlayerController.onVideoEnded = {
-            methodChannel.invokeMethod("onVideoEnded", null)
-        }
-        dailymotionPlayerController.onPlaybackError = { error ->
-            methodChannel.invokeMethod("onPlaybackError", mapOf("error" to error))
-        }
-        dailymotionPlayerController.onBufferingChanged = { isBuffering ->
-            methodChannel.invokeMethod("onBufferingChanged", mapOf("isBuffering" to isBuffering))
-        }
     }
 
     override fun getView(): View = dailymotionPlayerController
 
     override fun dispose() {
         methodChannel.setMethodCallHandler(null)
-        dailymotionPlayerController.dispose()
     }
 
     override fun onMethodCall(call: MethodCall, result: MethodChannel.Result) {
@@ -73,10 +60,10 @@ class DailymotionPlayerNativeView(
                     dailymotionPlayerController.setPlaybackSpeed(speed)
                     result.success(null)
                 }
-                "setMute" -> dailymotionPlayerController.setMute().also { result.success(null) }
-                "setUnMute" -> dailymotionPlayerController.setUnMute().also { result.success(null) }
+                "setMute" -> dailymotionPlayerController.mute().also { result.success(null) }
+                "setUnMute" -> dailymotionPlayerController.unMute().also { result.success(null) }
 
-                // Quick speed presets
+// Quick speed presets
                 "setPlaybackSpeed25" -> dailymotionPlayerController.setPlaybackSpeed(0.25).also { result.success(null) }
                 "setPlaybackSpeed50" -> dailymotionPlayerController.setPlaybackSpeed(0.5).also { result.success(null) }
                 "setPlaybackSpeed75" -> dailymotionPlayerController.setPlaybackSpeed(0.75).also { result.success(null) }
@@ -87,13 +74,13 @@ class DailymotionPlayerNativeView(
                 "setPlaybackSpeed200" -> dailymotionPlayerController.setPlaybackSpeed(2.0).also { result.success(null) }
 
                 else -> {
-                    android.util.Log.w("DailymotionPlayerNativeView", "Method not implemented: ${call.method}")
+                    Log.w("DailymotionPlayerNativeView", "Method not implemented: ${call.method}")
                     result.notImplemented()
                 }
+
             }
         } catch (e: Exception) {
-            android.util.Log.e("DailymotionPlayerNativeView", "Error handling method call: ${call.method}", e)
-            result.error("NATIVE_ERROR", "Error in native method: ${e.message}", null)
+            result.error("NATIVE_ERROR", e.message, null)
         }
     }
 }

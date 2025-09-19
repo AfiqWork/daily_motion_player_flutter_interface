@@ -1,6 +1,6 @@
 name: daily_motion_player_flutter_interface
 description: "A Flutter Package for Dailymotion native iOS & Android SDK integration"
-version: 0.0.1
+version: 0.0.2
 homepage: https://github.com/AfiqWork/daily_motion_player_flutter_interface.git
 
 environment:

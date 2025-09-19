@@ -174,9 +174,9 @@ class DailymotionPlayerNativeView: NSObject, FlutterPlatformView{
         let defaultParameters = DMPlayerParameters(
             scaleMode: .fit,
             mute: false,
-            loop: false,
+            loop: true,
             allowIDFA: false,
-            allowPIP: true,
+            allowPIP: false,
             defaultFullscreenOrientation: .landscapeRight
 
         )
