@@ -53,8 +53,9 @@ class _MyAppState extends State<MyApp> {
             width: 350,
           ),
         ),
-        floatingActionButton: FloatingActionButton(onPressed: (){
+        floatingActionButton: FloatingActionButton(onPressed: () async {
           controller.setMute();
+          print("RawDailymotionPlayerWidget ${await controller.playerIsPlaying()}");
         }),
       ),
     );

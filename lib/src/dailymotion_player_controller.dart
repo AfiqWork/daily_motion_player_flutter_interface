@@ -26,6 +26,7 @@ class DailymotionPlayerController {
     }
   }
 
+
   Future<void> pause() async {
     try {
       await _methodChannel.invokeMethod('pause');
@@ -78,6 +79,58 @@ class DailymotionPlayerController {
     }
   }
 
+  Future<bool?> playerIsBuffering() async {
+    try {
+      final isBuffering = await _methodChannel.invokeMethod<bool>('playerIsBuffering');
+      return isBuffering;
+    } on PlatformException catch (e) {
+      developer.log("Failed to get buffering status: '${e.message}'.");
+      return null;
+    }
+  }
+
+  Future<bool?> playerIsPlaying() async {
+    try {
+      final isPlaying = await _methodChannel.invokeMethod<bool>('playerIsPlaying');
+      return isPlaying;
+    } on PlatformException catch (e) {
+      developer.log("Failed to get playing status: '${e.message}'.");
+      return null;
+    }
+  }
+
+
+  Future<bool?> playerIsReplayScreen() async {
+    try {
+      final isPlaying = await _methodChannel.invokeMethod<bool>('playerIsReplayScreen');
+      return isPlaying;
+    } on PlatformException catch (e) {
+      developer.log("Failed to get playerIsReplayScreen status: '${e.message}'.");
+      return null;
+    }
+  }
+
+  Future<void> setPlaybackSpeed(double speed) async {
+    developer.log("inkwe");
+    await _methodChannel.invokeMethod('setPlaybackSpeed', {'speed': speed});
+  }
+
+  Future<void> updatePlayerParams({
+    bool? mute,
+    double? volume,
+    bool? enableControls,
+    String? scaleMode, // e.g. "aspectFit", "aspectFill", "fill"
+  }) async {
+    final params = <String, dynamic>{
+      if (mute != null) 'mute': mute,
+      if (volume != null) 'volume': volume,
+      if (enableControls != null) 'enableControls': enableControls,
+      if (scaleMode != null) 'scaleMode': scaleMode,
+    };
+
+    await _methodChannel.invokeMethod('updatePlayerParams', params);
+  }
+
   Future<void> setMute() async {
     try {
       await _methodChannel.invokeMethod('setMute');
@@ -94,11 +147,71 @@ class DailymotionPlayerController {
     }
   }
 
-  Future<void> setPlaybackSpeed(double speed) async {
+  Future<void> setPlaybackSpeed25() async {
     try {
-      await _methodChannel.invokeMethod('setPlaybackSpeed', {'speed': speed});
+      await _methodChannel.invokeMethod('setPlaybackSpeed25');
     } on PlatformException catch (e) {
-      developer.log("Failed setPlaybackSpeed: '${e.message}'.");
+      developer.log("Failed setPlaybackSpeed25: '${e.message}'.");
     }
   }
+
+
+  Future<void> setPlaybackSpeed50() async {
+    try {
+      await _methodChannel.invokeMethod('setPlaybackSpeed50');
+    } on PlatformException catch (e) {
+      developer.log("Failed setPlaybackSpeed50: '${e.message}'.");
+    }
+  }
+
+  Future<void> setPlaybackSpeed75() async {
+    try {
+      await _methodChannel.invokeMethod('setPlaybackSpeed75');
+    } on PlatformException catch (e) {
+      developer.log("Failed setPlaybackSpeed75: '${e.message}'.");
+    }
+  }
+
+  Future<void> setPlaybackSpeed100() async {
+    try {
+      await _methodChannel.invokeMethod('setPlaybackSpeed100');
+    } on PlatformException catch (e) {
+      developer.log("Failed setPlaybackSpeed100: '${e.message}'.");
+    }
+  }
+
+  Future<void> setPlaybackSpeed125() async {
+    try {
+      await _methodChannel.invokeMethod('setPlaybackSpeed125');
+    } on PlatformException catch (e) {
+      developer.log("Failed setPlaybackSpeed125: '${e.message}'.");
+    }
+  }
+
+  Future<void> setPlaybackSpeed150() async {
+    try {
+      await _methodChannel.invokeMethod('setPlaybackSpeed150');
+    } on PlatformException catch (e) {
+      developer.log("Failed setPlaybackSpeed150: '${e.message}'.");
+    }
+  }
+
+  Future<void> setPlaybackSpeed175() async {
+    try {
+      await _methodChannel.invokeMethod('setPlaybackSpeed175');
+    } on PlatformException catch (e) {
+      developer.log("Failed setPlaybackSpeed175: '${e.message}'.");
+    }
+  }
+
+  Future<void> setPlaybackSpeed200() async {
+    try {
+      await _methodChannel.invokeMethod('setPlaybackSpeed200');
+    } on PlatformException catch (e) {
+      developer.log("Failed setPlaybackSpeed200: '${e.message}'.");
+    }
+  }
+
+
+
 }

@@ -2,6 +2,7 @@ package com.lol.daily_motion_player_flutter_interface
 
 import android.content.Context
 import android.view.View
+import androidx.fragment.app.FragmentManager
 import io.flutter.plugin.common.BinaryMessenger
 import io.flutter.plugin.common.MethodCall
 import io.flutter.plugin.common.MethodChannel
@@ -9,54 +10,90 @@ import io.flutter.plugin.platform.PlatformView
 
 class DailymotionPlayerNativeView(
     context: Context,
-    messenger: BinaryMessenger,
+    binaryMessenger: BinaryMessenger,
+    fragmentManager: FragmentManager,
     id: Int,
-    creationParams: Map<*, *>?,
-    channelName: String
+    creationParams: Map<*, *>?
 ) : PlatformView, MethodChannel.MethodCallHandler {
 
-    private val methodChannel = MethodChannel(messenger, channelName)
-    private val controller = DailymotionPlayerController(context, creationParams)
+    private val methodChannel: MethodChannel
+    private val dailymotionPlayerController: DailymotionPlayerController =
+        DailymotionPlayerController(context, creationParams, fragmentManager)
 
     init {
+        methodChannel = MethodChannel(binaryMessenger, "dailymotion-player-channel-$id")
         methodChannel.setMethodCallHandler(this)
+
+        // Event callbacks
+        dailymotionPlayerController.onVideoEnded = {
+            methodChannel.invokeMethod("onVideoEnded", null)
+        }
+        dailymotionPlayerController.onPlaybackError = { error ->
+            methodChannel.invokeMethod("onPlaybackError", mapOf("error" to error))
+        }
+        dailymotionPlayerController.onBufferingChanged = { isBuffering ->
+            methodChannel.invokeMethod("onBufferingChanged", mapOf("isBuffering" to isBuffering))
+        }
     }
 
-    override fun getView(): View = controller
+    override fun getView(): View = dailymotionPlayerController
 
     override fun dispose() {
         methodChannel.setMethodCallHandler(null)
+        dailymotionPlayerController.dispose()
     }
 
     override fun onMethodCall(call: MethodCall, result: MethodChannel.Result) {
         try {
             when (call.method) {
-                "play" -> controller.play().also { result.success(null) }
-                "pause" -> controller.pause().also { result.success(null) }
+                "play" -> dailymotionPlayerController.play().also { result.success(null) }
+                "pause" -> dailymotionPlayerController.pause().also { result.success(null) }
                 "load" -> {
                     val videoId = call.argument<String>("videoId")
-                    if (videoId != null) controller.loadVideo(videoId)
-                    result.success(null)
+                    if (!videoId.isNullOrEmpty()) {
+                        dailymotionPlayerController.loadVideo(videoId)
+                        result.success(null)
+                    } else {
+                        result.error("INVALID_ARGUMENT", "videoId is required", null)
+                    }
                 }
                 "seek" -> {
-                    val seconds = (call.argument<Int>("seconds") ?: 0).toLong()
-                    controller.seek(seconds)
+                    val seconds = call.argument<Number>("seconds")?.toLong() ?: 0L
+                    dailymotionPlayerController.seek(seconds)
                     result.success(null)
                 }
-                "replay" -> controller.replay().also { result.success(null) }
-                "getVideoDuration" -> result.success(controller.getVideoDuration())
-                "getVideoCurrentTimestamp" -> result.success(controller.getVideoCurrentTimestamp())
+                "replay" -> dailymotionPlayerController.replay().also { result.success(null) }
+                "getVideoDuration" -> result.success(dailymotionPlayerController.getVideoDuration())
+                "getVideoCurrentTimestamp" -> result.success(dailymotionPlayerController.getVideoCurrentTimestamp())
+                "playerIsBuffering" -> result.success(dailymotionPlayerController.isBuffering)
+                "playerIsPlaying" -> result.success(dailymotionPlayerController.isPlaying)
+                "playerIsReplayScreen" -> result.success(dailymotionPlayerController.isReplayScreen)
                 "setPlaybackSpeed" -> {
                     val speed = call.argument<Double>("speed") ?: 1.0
-                    controller.setPlaybackSpeed(speed)
+                    dailymotionPlayerController.setPlaybackSpeed(speed)
                     result.success(null)
                 }
-                "mute" -> controller.mute().also { result.success(null) }
-                "unMute" -> controller.unMute().also { result.success(null) }
-                else -> result.notImplemented()
+                "setMute" -> dailymotionPlayerController.setMute().also { result.success(null) }
+                "setUnMute" -> dailymotionPlayerController.setUnMute().also { result.success(null) }
+
+                // Quick speed presets
+                "setPlaybackSpeed25" -> dailymotionPlayerController.setPlaybackSpeed(0.25).also { result.success(null) }
+                "setPlaybackSpeed50" -> dailymotionPlayerController.setPlaybackSpeed(0.5).also { result.success(null) }
+                "setPlaybackSpeed75" -> dailymotionPlayerController.setPlaybackSpeed(0.75).also { result.success(null) }
+                "setPlaybackSpeed100" -> dailymotionPlayerController.setPlaybackSpeed(1.0).also { result.success(null) }
+                "setPlaybackSpeed125" -> dailymotionPlayerController.setPlaybackSpeed(1.25).also { result.success(null) }
+                "setPlaybackSpeed150" -> dailymotionPlayerController.setPlaybackSpeed(1.5).also { result.success(null) }
+                "setPlaybackSpeed175" -> dailymotionPlayerController.setPlaybackSpeed(1.75).also { result.success(null) }
+                "setPlaybackSpeed200" -> dailymotionPlayerController.setPlaybackSpeed(2.0).also { result.success(null) }
+
+                else -> {
+                    android.util.Log.w("DailymotionPlayerNativeView", "Method not implemented: ${call.method}")
+                    result.notImplemented()
+                }
             }
         } catch (e: Exception) {
-            result.error("NATIVE_ERROR", e.message, null)
+            android.util.Log.e("DailymotionPlayerNativeView", "Error handling method call: ${call.method}", e)
+            result.error("NATIVE_ERROR", "Error in native method: ${e.message}", null)
         }
     }
 }
